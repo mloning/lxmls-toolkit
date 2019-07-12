@@ -10,8 +10,9 @@ import lxmls.classifiers.linear_classifier as lc
 # ----------
 class MaxEntBatch(lc.LinearClassifier):
 
-    def __init__(self, regularizer=1):
+    def __init__(self, regularizer=1, verbose=True):
         self.parameters = 0
+        self.verbose = verbose
         self.regularizer = regularizer
 
     def train(self, x, y):
@@ -62,5 +63,6 @@ class MaxEntBatch(lc.LinearClassifier):
         # exp_feat = spdot(x.transpose(),probs)
         exp_feat = np.dot(x.transpose(), probs)
         grad = exp_feat/nr_x + parameters2*sigma - emp_counts/nr_x
-        print("Objective = {0}".format(objective))
+        if self.verbose:
+            print("Objective = {0}".format(objective))
         return objective, grad.reshape([nr_f*nr_c], order="F")

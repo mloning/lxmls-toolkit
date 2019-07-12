@@ -21,12 +21,14 @@ class MultinomialNaiveBayes(lc.LinearClassifier):
         n_docs, n_words = x.shape
 
         # classes = a list of possible classes
-        classes = np.unique(y)
+        classes, frequencies = np.unique(y, return_counts=True)
         # n_classes = no. of classes
-        n_classes = np.unique(y).shape[0]
+        n_classes = len(classes)
 
         # initialization of the prior and likelihood variables
-        prior = np.zeros(n_classes)
+        # prior = np.zeros(n_classes)
+        prior = frequencies / n_classes  # class prior as relative frequency
+
         likelihood = np.zeros((n_words, n_classes))
 
         # TODO: This is where you have to write your code!
@@ -42,7 +44,9 @@ class MultinomialNaiveBayes(lc.LinearClassifier):
         # ----------
         # Solution to Exercise 1
 
-        raise NotImplementedError("Complete Exercise 1")
+        for i in range(n_classes):
+            is_class = (y == classes[i]).ravel()
+            likelihood[:, i] = (self.smooth_param + np.sum(x[is_class, :], axis=0)) / np.sum(x[is_class, :])
 
         # End solution to Exercise 1
         # ----------

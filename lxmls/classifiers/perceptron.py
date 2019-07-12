@@ -1,4 +1,3 @@
-import sys
 import numpy as np
 import lxmls.classifiers.linear_classifier as lc
 
@@ -11,15 +10,16 @@ class Perceptron(lc.LinearClassifier):
         self.nr_epochs = nr_epochs
         self.learning_rate = learning_rate
         self.averaged = averaged
-        self.params_per_round = []
+        self.params_per_epoch = []  # list of weights for each epoch
 
     def train(self, x, y, seed=1):
-        self.params_per_round = []
+        self.params_per_epoch = []
         x_orig = x[:, :]
         x = self.add_intercept_term(x)
         nr_x, nr_f = x.shape
         nr_c = np.unique(y).shape[0]
         w = np.zeros((nr_f, nr_c))
+
         for epoch_nr in range(self.nr_epochs):
 
             # use seed to generate permutation
@@ -41,18 +41,18 @@ class Perceptron(lc.LinearClassifier):
                     # Decrease features of the prediction
                     w[:, y_hat] += -1 * self.learning_rate * x[inst:inst+1, :].transpose()
 
-            self.params_per_round.append(w.copy())
+            self.params_per_epoch.append(w.copy())
             self.trained = True
             y_pred = self.test(x_orig, w)
             acc = self.evaluate(y, y_pred)
             self.trained = False
-            print("Rounds: %i Accuracy: %f" % (epoch_nr, acc))
+            print("Epoch: %i Accuracy: %f" % (epoch_nr, acc))
         self.trained = True
 
         if self.averaged:
             new_w = 0
-            for old_w in self.params_per_round:
+            for old_w in self.params_per_epoch:
                 new_w += old_w
-            new_w /= len(self.params_per_round)
+            new_w /= len(self.params_per_epoch)
             return new_w
         return w

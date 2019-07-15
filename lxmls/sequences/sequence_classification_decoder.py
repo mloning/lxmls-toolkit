@@ -1,6 +1,5 @@
 import numpy as np
 from lxmls.sequences.log_domain import *
-import pdb
 
 
 class SequenceClassificationDecoder:
@@ -101,8 +100,6 @@ class SequenceClassificationDecoder:
         # ----------
         # Solution to Exercise 8
 
-        raise NotImplementedError("Complete Exercise 8")
-
         #### Little guide of the implementation ####################################
         # Initializatize the viterbi scores
         #
@@ -117,6 +114,44 @@ class SequenceClassificationDecoder:
         #
         # return best_path and best_score
         ############################################################################
+
+
+        # forward pass, computing scores, keeping track of path
+
+        # use addition (instead of multiplication) because we're in the log domain
+
+        # initialise first step
+        for c in range(num_states):
+            viterbi_scores[0, c] = initial_scores[c] + emission_scores[0, c]
+
+        # given first step, iterate over remaining steps
+        for i in range(1, length):
+            for c in range(num_states):
+
+                score = transition_scores[i - 1, c, :] + viterbi_scores[i - 1, :]
+
+                viterbi_scores[i, c] = np.max(score) + emission_scores[i, c]
+                viterbi_paths[i, c] = np.argmax(score)
+
+        # find best score
+        last_score = final_scores + viterbi_scores[-1, :]
+        best_score = np.max(last_score)
+
+        # backward pass, finding best path
+
+        # initialise at last step
+        best_path[-1] = np.argmax(last_score)
+
+        # given last step, iterate over remaining steps
+        # for i in range(1, length):
+        #     last_state = best_path[-(i + 1)]
+        #     best_path[-(i + 1)] = viterbi_paths[-(i + 1), last_state]
+
+        for i in range(length - 2, -1, -1):
+            last_state = best_path[i + 1]
+            best_path[i] = viterbi_paths[i + 1, last_state]
+
+        return best_path, best_score
 
         # End of solution to Exercise 8
         # ----------
